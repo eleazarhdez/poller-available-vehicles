@@ -11,14 +11,14 @@ import static com.eleazar.polling.pollerAvailableVehicles.Poller.pollerMeep;
 @SpringBootApplication
 public class PollerAvailableVehiclesApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PollerAvailableVehiclesApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PollerAvailableVehiclesApplication.class, args);
+    }
 
-	@Bean
-	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-		return args -> {
-			pollerMeep();
-		};
-	}
+    @Bean
+    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
+        return args -> {
+            pollerMeep();
+        };
+    }
 }

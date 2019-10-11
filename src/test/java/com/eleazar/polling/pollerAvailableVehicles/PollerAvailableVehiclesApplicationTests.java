@@ -18,21 +18,21 @@ import static com.eleazar.polling.pollerAvailableVehicles.Poller.meepApiRequest;
 @SpringBootTest
 public class PollerAvailableVehiclesApplicationTests {
 
-	@Test
-	public void checkApiResponse() {
-		JSONArray response = null;
-		try {
-			response = meepApiRequest();
-			assert (response.getJSONObject(0).get("id") != null);
-		} catch (IOException | JSONException e) {
-			System.out.println("Something was wrong: " + e.getMessage());
-		}
-	}
+    @Test
+    public void checkApiResponse() {
+        JSONArray response = null;
+        try {
+            response = meepApiRequest();
+            assert (response.getJSONObject(0).get("id") != null);
+        } catch (IOException | JSONException e) {
+            System.out.println("Something was wrong: " + e.getMessage());
+        }
+    }
 
-	@Test
-	public void checkIdListIsNotEmpty() {
-		Set ids = getIdSet();
-		assert (ids.size() > 0);
-	}
+    @Test
+    public void checkIdListIsNotEmpty() {
+        Set ids = getIdSet();
+        assert (ids.size() > 0);
+    }
 
 }
