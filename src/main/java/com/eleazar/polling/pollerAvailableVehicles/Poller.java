@@ -10,6 +10,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static utils.Utils.bufferedReaderToJson;
 
@@ -18,6 +21,39 @@ public class Poller {
     final static String MEEP_URL = "https://apidev.meep.me/tripplan/api/v1/routers/lisboa/resources?" +
             "lowerLeftLatLon=38.711046,-9.160096&upperRightLatLon=38.739429,-" +
             "9.137115&companyZoneIds=545,467,473";
+    final static int INITIAL_DELAY= 30;
+    final static int DELAY = 30;
+    static Set<String> firstRequestResults = new HashSet<>();
+
+
+    public static void pollerMeep () {
+        firstRequestResults = getIdSet();
+
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        Runnable task = () -> {
+            getAvailableAndNotAvailableVehicles();
+        };
+        executor.scheduleWithFixedDelay(task, INITIAL_DELAY, DELAY, TimeUnit.SECONDS);
+
+    }
+
+    public static void getAvailableAndNotAvailableVehicles() {
+        Set<String> secondRequestResults = getIdSet();
+
+        Set<String> resultsOnlyOnFirstRequest = new HashSet<String>(firstRequestResults);
+        Set<String> resultsOnlyOnSecondRequest = new HashSet<String>(secondRequestResults);
+
+        Set<String> intersection = new HashSet<String>(firstRequestResults);
+        intersection.retainAll(secondRequestResults);
+
+        resultsOnlyOnFirstRequest.removeAll(intersection);
+        resultsOnlyOnSecondRequest.removeAll(intersection);
+
+        System.out.println("No longer available: " + resultsOnlyOnFirstRequest.toString());
+        System.out.println("New available: " + resultsOnlyOnSecondRequest.toString());
+
+        firstRequestResults = secondRequestResults;
+    }
 
     public static Set getIdSet() {
         ArrayList<String> idList = new ArrayList<String>();
