@@ -1,5 +1,6 @@
 package com.eleazar.polling.pollerAvailableVehicles;
 
+import com.eleazar.polling.models.Coordinates;
 import org.json.JSONArray;
 
 import java.io.BufferedReader;
@@ -9,36 +10,36 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static utils.Utils.bufferedReaderToJson;
+import static com.eleazar.polling.utils.Utils.bufferedReaderToJson;
+import static com.eleazar.polling.utils.Utils.buildUrl;
 
 public class Poller {
 
-    final static String MEEP_URL = "https://apidev.meep.me/tripplan/api/v1/routers/lisboa/resources?" +
-            "lowerLeftLatLon=38.711046,-9.160096&upperRightLatLon=38.739429,-" +
-            "9.137115&companyZoneIds=545,467,473";
     final static int INITIAL_DELAY= 30;
     final static int DELAY = 30;
     static Set<String> firstRequestResults = new HashSet<>();
 
 
-    public static void pollerMeep () {
-        firstRequestResults = getIdSet();
+    public static void pollerMeep (Coordinates lowerLeftLatLon, Coordinates upperRightLatLon, List<Integer> companyIds) {
+        firstRequestResults = getIdSet(lowerLeftLatLon, upperRightLatLon, companyIds);
 
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
-            getAvailableAndNotAvailableVehicles();
+            getAvailableAndNotAvailableVehicles(lowerLeftLatLon, upperRightLatLon, companyIds);
         };
         executor.scheduleWithFixedDelay(task, INITIAL_DELAY, DELAY, TimeUnit.SECONDS);
 
     }
 
-    public static void getAvailableAndNotAvailableVehicles() {
-        Set<String> secondRequestResults = getIdSet();
+    public static void getAvailableAndNotAvailableVehicles(Coordinates lowerLeftLatLon, Coordinates upperRightLatLon,
+                                                           List<Integer> companyIds) {
+        Set<String> secondRequestResults = getIdSet(lowerLeftLatLon, upperRightLatLon, companyIds);
 
         Set<String> resultsOnlyOnFirstRequest = new HashSet<String>(firstRequestResults);
         Set<String> resultsOnlyOnSecondRequest = new HashSet<String>(secondRequestResults);
@@ -55,10 +56,10 @@ public class Poller {
         firstRequestResults = secondRequestResults;
     }
 
-    public static Set getIdSet() {
+    public static Set getIdSet(Coordinates lowerLeftLatLon, Coordinates upperRightLatLon, List<Integer> companyIds) {
         ArrayList<String> idList = new ArrayList<String>();
         try {
-            JSONArray response = meepApiRequest();
+            JSONArray response = meepApiRequest(lowerLeftLatLon, upperRightLatLon, companyIds);
 
             for (int i = 0; i < response.length(); i++) {
                 idList.add((String) response.getJSONObject(i).get("id"));
@@ -70,8 +71,9 @@ public class Poller {
         return new HashSet<String>(idList);
     }
 
-    public static JSONArray meepApiRequest() throws IOException {
-        URL url = new URL(MEEP_URL);
+
+    public static JSONArray meepApiRequest(Coordinates lowerLeftLatLon, Coordinates upperRightLatLon, List<Integer> companyIds) throws IOException {
+        URL url = new URL(buildUrl(lowerLeftLatLon, upperRightLatLon, companyIds));
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/json");
