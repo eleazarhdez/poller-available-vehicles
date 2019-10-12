@@ -22,7 +22,7 @@ import static com.eleazar.polling.pollerAvailableVehicles.Poller.meepApiRequest;
 public class PollerAvailableVehiclesApplicationTests {
     Coordinates lowerLeftLatLon = new Coordinates(38.711046, -9.160096);
     Coordinates upperRightLatLon = new Coordinates(38.739429, -9.137115);
-    List<Integer> companyIds = new ArrayList<Integer>(Arrays.asList(545,467,473)); //545,467,473
+    List<Integer> companyIds = new ArrayList<Integer>(Arrays.asList(545,467,473)); 
 
     @Test
     public void checkApiResponse() {
